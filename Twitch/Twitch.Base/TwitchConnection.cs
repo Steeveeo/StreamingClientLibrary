@@ -478,14 +478,14 @@ namespace Twitch.Base
             Validator.ValidateString(clientID, "clientID");
             Validator.ValidateList(scopes, "scopes");
 
-            LocalOAuthHttpListenerServer oauthServer = new LocalOAuthHttpListenerServer("access_token", successResponse);
+            LocalImplicitOAuthHttpListenerServer oauthServer = new LocalImplicitOAuthHttpListenerServer("access_token", successResponse);
             oauthServer.Start(oauthListenerURL);
 
             string url = await TwitchConnection.GetImplicitFlowURLForOAuthBrowser(clientID, scopes, oauthListenerURL, forceApprovalPrompt);
             ProcessStartInfo startInfo = new ProcessStartInfo() { FileName = url, UseShellExecute = true };
             Process.Start(startInfo);
 
-            string accessToken = await oauthServer.WaitForAuthorizationCode();
+            string accessToken = await oauthServer.WaitForAccessToken();
             oauthServer.Stop();
 
             if (accessToken != null)
@@ -522,7 +522,7 @@ namespace Twitch.Base
         /// Creates a TwitchConnection object from the Implicit Grant Flow.
         /// </summary>
         /// <param name="clientID">The ID of the client application</param>
-        /// <param name="authorizationCode">The authorization code for the authenticated user</param>
+        /// <param name="accessToken">The authorization code for the authenticated user</param>
         /// <param name="scopes">The list of scopes that were requested</param>
         /// <param name="redirectUrl">The redirect URL of the client application</param>
         /// <returns>The TwitchConnection object</returns>
