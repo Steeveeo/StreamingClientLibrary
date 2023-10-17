@@ -73,11 +73,17 @@ namespace StreamingClient.Base.Model.OAuth
         public DateTimeOffset ExpirationDateTime { get { return (this.expiresTimeStamp > 0) ? DateTimeOffset.FromUnixTimeSeconds(this.expiresTimeStamp) : this.AcquiredDateTime.AddSeconds(this.expiresIn); } }
 
         /// <summary>
+        /// Whether or not this token was retrieved by Implicit Grant Flow.
+        /// </summary>
+        public bool IsImplicitToken { get; set; }
+
+        /// <summary>
         /// Creates a new instance of an OAuth token.
         /// </summary>
         public OAuthTokenModel()
         {
             this.AcquiredDateTime = DateTimeOffset.Now;
+            this.IsImplicitToken = false;
         }
     }
 }
