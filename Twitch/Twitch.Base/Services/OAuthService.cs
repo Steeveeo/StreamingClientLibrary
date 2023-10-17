@@ -69,6 +69,29 @@ namespace Twitch.Base.Services
         }
 
         /// <summary>
+        /// Creates an OAuth token for authenticating with the Twitch services using the Implicit Grant Flow.
+        /// </summary>
+        /// <param name="clientID">The id of the client application</param>
+        /// <param name="authorizationCode">The authorization code</param>
+        /// <param name="scopes">The list of scopes that were requested</param>
+        /// <param name="redirectUrl">The URL to redirect to after authorization is complete</param>
+        /// <returns>The OAuth token</returns>
+        public async Task<OAuthTokenModel> GetOAuthImplicitTokenModel(string clientID, string accessToken, IEnumerable<OAuthClientScopeEnum> scopes, string redirectUrl = null)
+        {
+            Validator.ValidateString(clientID, "clientID");
+
+			OAuthTokenModel token = new OAuthTokenModel
+			{
+				clientID = clientID,
+				accessToken = accessToken,
+				ScopeList = string.Join(",", scopes ?? new List<OAuthClientScopeEnum>()),
+				IsImplicitToken = true
+			};
+
+			return token;
+        }
+
+        /// <summary>
         /// Refreshes the specified OAuth token.
         /// </summary>
         /// <param name="token">The token to refresh</param>
@@ -77,6 +100,10 @@ namespace Twitch.Base.Services
         {
             Validator.ValidateVariable(token, "token");
 
+            //Implicit Grant Flow tokens apparently cannot be refreshed as they are meant for single-session auth
+            if (token.IsImplicitToken)
+                return token;
+
             Dictionary<string, string> parameters = new Dictionary<string, string>()
             {
                 { "client_id", token.clientID },
@@ -84,6 +111,7 @@ namespace Twitch.Base.Services
                 { "refresh_token", token.refreshToken },
                 { "grant_type", "refresh_token" },
             };
+
             FormUrlEncodedContent content = new FormUrlEncodedContent(parameters.AsEnumerable());
 
             OAuthTokenModel newToken = await this.PostAsync<OAuthTokenModel>("oauth2/token?" + await content.ReadAsStringAsync(), AdvancedHttpClient.CreateContentFromObject(string.Empty), autoRefreshToken: false);
