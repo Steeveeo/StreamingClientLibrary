@@ -379,6 +379,37 @@ namespace Twitch.Base
         }
 
         /// <summary>
+        /// Generates the OAuth URL to use for Implicit Flow authentication.
+        /// </summary>
+        /// <param name="clientID">The ID of the client application</param>
+        /// <param name="scopes">The authorization scopes to request</param>
+        /// <param name="redirectUri">The redirect URL for the client application</param>
+        /// <param name="forceApprovalPrompt">Whether to force an approval from the user</param>
+        /// <returns>The authorization URL</returns>
+        public static async Task<string> GetImplicitFlowURLForOAuthBrowser(string clientID, IEnumerable<OAuthClientScopeEnum> scopes, string redirectUri, bool forceApprovalPrompt = false)
+        {
+            Validator.ValidateString(clientID, "clientID");
+            Validator.ValidateList(scopes, "scopes");
+            Validator.ValidateString(redirectUri, "redirectUri");
+            Dictionary<string, string> parameters = new Dictionary<string, string>()
+            {
+                { "client_id", clientID },
+                { "scope", TwitchConnection.ConvertClientScopesToString(scopes) },
+                { "response_type", "token" },
+                { "redirect_uri", redirectUri },
+            };
+
+            if (forceApprovalPrompt)
+            {
+                parameters.Add("force_verify", "true");
+            }
+
+            FormUrlEncodedContent content = new FormUrlEncodedContent(parameters.AsEnumerable());
+
+            return "https://id.twitch.tv/oauth2/authorize?" + await content.ReadAsStringAsync();
+        }
+
+        /// <summary>
         /// Generates the OAuth token URL to use for app access token creation.
         /// </summary>
         /// <param name="clientID">The ID of the client application</param>
@@ -434,6 +465,37 @@ namespace Twitch.Base
         }
 
         /// <summary>
+        /// Creates a TwitchConnection object from an OAuth authentication locally using Implict Grant Flow.
+        /// </summary>
+        /// <param name="clientID">The ID of the client application</param>
+        /// <param name="scopes">The authorization scopes to request</param>
+        /// <param name="forceApprovalPrompt">Whether to force an approval from the user</param>
+        /// <param name="oauthListenerURL">The URL to listen for the OAuth successful authentication</param>
+        /// <param name="successResponse">The response to send back upon successful authentication</param>
+        /// <returns>The TwitchConnection object</returns>
+        public static async Task<TwitchConnection> ConnectViaLocalhostOAuthBrowserImplicit(string clientID, IEnumerable<OAuthClientScopeEnum> scopes, bool forceApprovalPrompt = false, string oauthListenerURL = DEFAULT_OAUTH_LOCALHOST_URL, string successResponse = null)
+        {
+            Validator.ValidateString(clientID, "clientID");
+            Validator.ValidateList(scopes, "scopes");
+
+            LocalOAuthHttpListenerServer oauthServer = new LocalOAuthHttpListenerServer("access_token", successResponse);
+            oauthServer.Start(oauthListenerURL);
+
+            string url = await TwitchConnection.GetImplicitFlowURLForOAuthBrowser(clientID, scopes, oauthListenerURL, forceApprovalPrompt);
+            ProcessStartInfo startInfo = new ProcessStartInfo() { FileName = url, UseShellExecute = true };
+            Process.Start(startInfo);
+
+            string accessToken = await oauthServer.WaitForAuthorizationCode();
+            oauthServer.Stop();
+
+            if (accessToken != null)
+            {
+                return await TwitchConnection.ConnectViaImplicitFlow(clientID, accessToken, scopes, redirectUrl: oauthListenerURL);
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Creates a TwitchConnection object from an authorization code.
         /// </summary>
         /// <param name="clientID">The ID of the client application</param>
@@ -449,6 +511,28 @@ namespace Twitch.Base
 
             OAuthService oauthService = new OAuthService();
             OAuthTokenModel token = await oauthService.GetOAuthTokenModel(clientID, clientSecret, authorizationCode, scopes, redirectUrl);
+            if (token == null)
+            {
+                throw new InvalidOperationException("OAuth token was not acquired");
+            }
+            return new TwitchConnection(token);
+        }
+
+        /// <summary>
+        /// Creates a TwitchConnection object from the Implicit Grant Flow.
+        /// </summary>
+        /// <param name="clientID">The ID of the client application</param>
+        /// <param name="authorizationCode">The authorization code for the authenticated user</param>
+        /// <param name="scopes">The list of scopes that were requested</param>
+        /// <param name="redirectUrl">The redirect URL of the client application</param>
+        /// <returns>The TwitchConnection object</returns>
+        public static async Task<TwitchConnection> ConnectViaImplicitFlow(string clientID, string accessToken, IEnumerable<OAuthClientScopeEnum> scopes = null, string redirectUrl = null)
+        {
+            Validator.ValidateString(clientID, "clientID");
+            Validator.ValidateString(accessToken, "accessToken");
+
+            OAuthService oauthService = new OAuthService();
+            OAuthTokenModel token = await oauthService.GetOAuthImplicitTokenModel(clientID, accessToken, scopes, redirectUrl);
             if (token == null)
             {
                 throw new InvalidOperationException("OAuth token was not acquired");
@@ -541,7 +625,7 @@ namespace Twitch.Base
 
         internal async Task<OAuthTokenModel> GetOAuthToken(bool autoRefreshToken = true)
         {
-            if (autoRefreshToken && this.token.ExpirationDateTime < DateTimeOffset.Now)
+            if (autoRefreshToken && !this.token.IsImplicitToken && this.token.ExpirationDateTime < DateTimeOffset.Now)
             {
                 await this.RefreshOAuthToken();
             }
