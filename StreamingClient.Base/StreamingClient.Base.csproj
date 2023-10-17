@@ -13,7 +13,7 @@
 
 For more information, please see our project site: https://github.com/SaviorXTanren/StreamingClientLibrary</Description>
     <PackageTags>Streaming Bot Chat Library</PackageTags>
-    <PackageId>StreamingClientLibrary.Base</PackageId>
+    <PackageId>StreamingClientLibrary.Base.ImplicitFlow</PackageId>
     <Product>Streaming Client Library</Product>
     <PackageReleaseNotes>Adding scope list to OAuth Token</PackageReleaseNotes>
     <AssemblyVersion>1.0.0.12</AssemblyVersion>
@@ -29,7 +29,7 @@ For more information, please see our project site: https://github.com/SaviorXTan
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>S:\Code\mixer-client-csharp\StreamingClient.Base\StreamingClient.Base.xml</DocumentationFile>
+    <DocumentationFile>StreamingClient.Base.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

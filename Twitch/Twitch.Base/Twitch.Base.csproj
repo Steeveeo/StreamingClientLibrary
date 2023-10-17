@@ -13,7 +13,6 @@
       
 For more information, please see our project site: https://github.com/SaviorXTanren/StreamingClientLibrary</Description>
     <PackageTags>Twitch Streaming Bot Chat Interactive</PackageTags>
-    <PackageId>StreamingClientLibrary.Twitch</PackageId>
     <Product>Twitch Streaming Client Library</Product>
     <RepositoryUrl>https://github.com/SaviorXTanren/StreamingClientLibrary</RepositoryUrl>
     <PackageProjectUrl>https://github.com/SaviorXTanren/StreamingClientLibrary</PackageProjectUrl>
@@ -37,7 +36,7 @@ For more information, please see our project site: https://github.com/SaviorXTan
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
     <AssemblyVersion>1.0.0.76</AssemblyVersion>
     <FileVersion>1.0.0.76</FileVersion>
-    <PackageId>StreamingClientLibrary.Twitch</PackageId>
+    <PackageId>StreamingClientLibrary.Twitch.ImplicitFlow</PackageId>
     <PackageLicenseUrl>https://github.com/SaviorXTanren/StreamingClientLibrary/blob/master/LICENSE.txt</PackageLicenseUrl>
     <PackageReleaseNotes>Changing follow APIs from Users service to Channels service</PackageReleaseNotes>
   </PropertyGroup>
