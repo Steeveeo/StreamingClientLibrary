@@ -72,23 +72,24 @@ namespace Twitch.Base.Services
         /// Creates an OAuth token for authenticating with the Twitch services using the Implicit Grant Flow.
         /// </summary>
         /// <param name="clientID">The id of the client application</param>
-        /// <param name="authorizationCode">The authorization code</param>
+        /// <param name="accessToken">The authorization code</param>
         /// <param name="scopes">The list of scopes that were requested</param>
         /// <param name="redirectUrl">The URL to redirect to after authorization is complete</param>
         /// <returns>The OAuth token</returns>
         public async Task<OAuthTokenModel> GetOAuthImplicitTokenModel(string clientID, string accessToken, IEnumerable<OAuthClientScopeEnum> scopes, string redirectUrl = null)
         {
             Validator.ValidateString(clientID, "clientID");
+            Validator.ValidateString(accessToken, "accessToken");
 
-			OAuthTokenModel token = new OAuthTokenModel
-			{
-				clientID = clientID,
-				accessToken = accessToken,
-				ScopeList = string.Join(",", scopes ?? new List<OAuthClientScopeEnum>()),
-				IsImplicitToken = true
-			};
+            OAuthTokenModel token = new OAuthTokenModel
+            {
+                clientID = clientID,
+                accessToken = accessToken,
+                ScopeList = string.Join(",", scopes ?? new List<OAuthClientScopeEnum>()),
+                IsImplicitToken = true
+            };
 
-			return token;
+            return token;
         }
 
         /// <summary>

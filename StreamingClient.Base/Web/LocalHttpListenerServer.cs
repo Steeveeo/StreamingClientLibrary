@@ -98,24 +98,35 @@ namespace StreamingClient.Base.Web
         /// <returns>The parameter value of the request</returns>
         protected string GetRequestParameter(HttpListenerContext listenerContext, string parameter)
         {
-            if (listenerContext.Request.RawUrl.Contains(parameter))
+            return GetParameterFromString(listenerContext.Request.RawUrl, parameter);
+        }
+
+        /// <summary>
+        /// Gets a parameter value from a given parameterized string (either Request or POST data).
+        /// </summary>
+        /// <param name="data">The string to parse</param>
+        /// <param name="parameter">The name of the parameter</param>
+        /// <returns>The parameter value from the input</returns>
+        protected string GetParameterFromString(string data, string parameter)
+        {
+            if (data.Contains(parameter))
             {
                 string searchString = "?" + parameter + "=";
-                int startIndex = listenerContext.Request.RawUrl.IndexOf(searchString);
+                int startIndex = data.IndexOf(searchString);
                 if (startIndex < 0)
                 {
                     searchString = "&" + parameter + "=";
-                    startIndex = listenerContext.Request.RawUrl.IndexOf(searchString);
+                    startIndex = data.IndexOf(searchString);
                     if (startIndex < 0)
                     {
                         searchString = "#" + parameter + "=";
-                        startIndex = listenerContext.Request.RawUrl.IndexOf(searchString);
+                        startIndex = data.IndexOf(searchString);
                     }
                 }
                 
                 if (startIndex >= 0)
                 {
-                    string token = listenerContext.Request.RawUrl.Substring(startIndex + searchString.Length);
+                    string token = data.Substring(startIndex + searchString.Length);
 
                     int endIndex = token.IndexOf("&");
                     if (endIndex > 0)
