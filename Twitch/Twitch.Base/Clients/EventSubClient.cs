@@ -85,9 +85,12 @@ namespace Twitch.Base.Clients
         /// Connects to the default EventSub connection.
         /// </summary>
         /// <returns>An awaitable Task</returns>
-        public async Task Connect()
+        public async Task Connect(bool useTestServer=false)
         {
-            await base.Connect(EventSubClient.EVENT_SUB_CONNECTION_URL);
+            if(useTestServer)
+                await base.Connect("ws://localhost:8080/ws");
+            else
+                await base.Connect(EventSubClient.EVENT_SUB_CONNECTION_URL);
         }
 
         /// <inheritdoc />
