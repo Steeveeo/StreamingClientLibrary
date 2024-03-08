@@ -94,6 +94,11 @@
             The expiration time of the token.
             </summary>
         </member>
+        <member name="P:StreamingClient.Base.Model.OAuth.OAuthTokenModel.IsImplicitToken">
+            <summary>
+            Whether or not this token was retrieved by Implicit Grant Flow.
+            </summary>
+        </member>
         <member name="M:StreamingClient.Base.Model.OAuth.OAuthTokenModel.#ctor">
             <summary>
             Creates a new instance of an OAuth token.
@@ -1144,6 +1149,14 @@
             <param name="parameter">The name of the parameter</param>
             <returns>The parameter value of the request</returns>
         </member>
+        <member name="M:StreamingClient.Base.Web.LocalHttpListenerServer.GetParameterFromString(System.String,System.String)">
+            <summary>
+            Gets a parameter value from a given parameterized string (either Request or POST data).
+            </summary>
+            <param name="data">The string to parse</param>
+            <param name="parameter">The name of the parameter</param>
+            <returns>The parameter value from the input</returns>
+        </member>
         <member name="M:StreamingClient.Base.Web.LocalHttpListenerServer.GetRequestContent(System.Net.HttpListenerContext)">
             <summary>
             Gets the content of the request. 
@@ -1159,6 +1172,38 @@
             <param name="statusCode">The status code to send</param>
             <param name="content">The text content to include</param>
             <returns></returns>
+        </member>
+        <member name="T:StreamingClient.Base.Web.LocalImplicitOAuthHttpListenerServer">
+            <summary>
+            An Http listening server for processing OAuth requests.
+            </summary>
+        </member>
+        <member name="M:StreamingClient.Base.Web.LocalImplicitOAuthHttpListenerServer.#ctor(System.String)">
+            <summary>
+            Creates a new instance of the LocalOAuthHttpListenerService with the specified address.
+            </summary>
+            <param name="accessTokenParameterName">The name of the parameter for the authorization code</param>
+        </member>
+        <member name="M:StreamingClient.Base.Web.LocalImplicitOAuthHttpListenerServer.#ctor(System.String,System.String)">
+            <summary>
+            Creates a new instance of the LocalOAuthHttpListenerService with the specified address &amp; login response.
+            </summary>
+            <param name="accessTokenParameterName">The name of the parameter for the authorization code</param>
+            <param name="successResponse">The response to send upon successfully obtaining an authorization token</param>
+        </member>
+        <member name="M:StreamingClient.Base.Web.LocalImplicitOAuthHttpListenerServer.WaitForAccessToken(System.Int32)">
+            <summary>
+            Waits for a successful authorization response from the OAuth service.
+            </summary>
+            <param name="secondsToWait">The total number of seconds to wait</param>
+            <returns>The authorization token from the OAuth service</returns>
+        </member>
+        <member name="M:StreamingClient.Base.Web.LocalImplicitOAuthHttpListenerServer.ProcessConnection(System.Net.HttpListenerContext)">
+            <summary>
+            Processes an http request.
+            </summary>
+            <param name="listenerContext">The context of the request</param>
+            <returns>An awaitable task to process the request</returns>
         </member>
         <member name="T:StreamingClient.Base.Web.LocalOAuthHttpListenerServer">
             <summary>
